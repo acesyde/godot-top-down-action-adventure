@@ -4,27 +4,29 @@ class_name Player
 #--------------------------------
 # Exported variables
 #--------------------------------
-@export var move_speed : float = 100.0
 
 #--------------------------------
 # Onready variables
 #--------------------------------
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
 @onready var sprite_2d: Sprite2D = $Sprite2D
+@onready var state_machine: PlayerStateMachine = $StateMachine
 
 #--------------------------------
 # Local variables
 #--------------------------------
 var cardinal_direction : Vector2 = Vector2.DOWN
 var direction : Vector2 = Vector2.ZERO
-var state : String = "idle"
+
+func _ready() -> void:
+	state_machine.Initialize(self)
 
 func _process(delta: float) -> void:
 	direction = Input.get_vector("left", "right", "up", "down")
-	velocity = direction * move_speed
-	
-	if SetState() || SetDirection():
-		UpdateAnimation()
+	#velocity = direction * move_speed
+	#
+	#if SetState() || SetDirection():
+		#UpdateAnimation()
 
 func _physics_process(delta: float) -> void:
 	move_and_slide()
@@ -48,16 +50,16 @@ func SetDirection() -> bool:
 		
 	return true
 
-func SetState() -> bool:
-	var new_state : String = "idle" if direction == Vector2.ZERO else "walk"
-	
-	if new_state == state:
-		return false
+#func SetState() -> bool:
+	#var new_state : String = "idle" if direction == Vector2.ZERO else "walk"
+	#
+	#if new_state == state:
+		#return false
+#
+	#state = new_state
+	#return true
 
-	state = new_state
-	return true
-
-func UpdateAnimation() -> void:
+func UpdateAnimation(state: String) -> void:
 	var animation_name:String = state+"_"+AnimDirection()
 	animation_player.play(animation_name)
 	
