@@ -18,15 +18,16 @@ class_name Player
 var cardinal_direction : Vector2 = Vector2.DOWN
 var direction : Vector2 = Vector2.ZERO
 
+#--------------------------------
+# Signals
+#--------------------------------
+signal DirectionChanged(new_direction: Vector2)
+
 func _ready() -> void:
 	state_machine.Initialize(self)
 
 func _process(delta: float) -> void:
 	direction = Input.get_vector("left", "right", "up", "down")
-	#velocity = direction * move_speed
-	#
-	#if SetState() || SetDirection():
-		#UpdateAnimation()
 
 func _physics_process(delta: float) -> void:
 	move_and_slide()
@@ -46,18 +47,10 @@ func SetDirection() -> bool:
 		return false
 		
 	cardinal_direction = new_direction
+	DirectionChanged.emit(cardinal_direction)
 	sprite_2d.scale.x = -1 if cardinal_direction == Vector2.LEFT else 1
 		
 	return true
-
-#func SetState() -> bool:
-	#var new_state : String = "idle" if direction == Vector2.ZERO else "walk"
-	#
-	#if new_state == state:
-		#return false
-#
-	#state = new_state
-	#return true
 
 func UpdateAnimation(state: String) -> void:
 	var animation_name:String = state+"_"+AnimDirection()
