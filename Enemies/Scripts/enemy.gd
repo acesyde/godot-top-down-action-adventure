@@ -1,45 +1,37 @@
 extends CharacterBody2D
-class_name Player
+class_name Enemy
 
-#--------------------------------
-# Exported variables
-#--------------------------------
+signal direction_changed(new_direction: Vector2)
+signal enemy_damaged()
 
-#--------------------------------
-# Onready variables
-#--------------------------------
-@onready var animation_player: AnimationPlayer = $AnimationPlayer
-@onready var sprite_2d: Sprite2D = $Sprite2D
-@onready var state_machine: PlayerStateMachine = $StateMachine
-
-#--------------------------------
-# Local variables
-#--------------------------------
 const DIR_4: Array[Vector2] = [Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT, Vector2.UP]
+
 var cardinal_direction : Vector2 = Vector2.DOWN
 var direction : Vector2 = Vector2.ZERO
 
-#--------------------------------
-# Signals
-#--------------------------------
-signal direction_changed(new_direction: Vector2)
+var player:Player
+var invulnerable:bool = false
+
+@export var hp:int = 3
+
+@onready var sprite_2d: Sprite2D = $Sprite2D
+@onready var animation_player: AnimationPlayer = $AnimationPlayer
+@onready var enemy_state_machine: EnemyStateMachine = $StateMachine
 
 func _ready() -> void:
-	PlayerManager.player = self
-	state_machine.initialize(self)
-
-func _process(delta: float) -> void:
-	direction = Input.get_vector("left", "right", "up", "down")
+	enemy_state_machine.initialize(self)
+	player = PlayerManager.player
 
 func _physics_process(delta: float) -> void:
 	move_and_slide()
 
-func set_direction() -> bool:
+func set_direction(new_direction: Vector2) -> bool:
+	direction = new_direction
 	if direction == Vector2.ZERO:
 		return false
 		
 	var direction_id : int = int(round((direction + cardinal_direction * 0.1).angle() / TAU * DIR_4.size()))
-	var new_direction = DIR_4[direction_id]
+	new_direction = DIR_4[direction_id]
 		
 	if new_direction == cardinal_direction:
 		return false
@@ -53,7 +45,7 @@ func set_direction() -> bool:
 func update_animation(state: String) -> void:
 	var animation_name:String = state + "_" + anim_direction()
 	animation_player.play(animation_name)
-	
+
 func anim_direction() -> String:
 	match cardinal_direction:
 		Vector2.UP: return "up"

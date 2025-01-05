@@ -1,9 +1,9 @@
 extends Node
-class_name PlayerStateMachine
+class_name EnemyStateMachine
 
-var states: Array[State]
-var previous_state: State
-var current_state: State
+var states: Array[EnemyState]
+var previous_state: EnemyState
+var current_state: EnemyState
 
 func _ready() -> void:
 	process_mode = Node.ProcessMode.PROCESS_MODE_DISABLED
@@ -14,23 +14,25 @@ func _process(delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	change_state(current_state.physics(delta))
 
-func _unhandled_input(event: InputEvent) -> void:
-	change_state(current_state.handle_input(event))
-
-func initialize(player: Player) -> void:
+func initialize(enemy: Enemy) -> void:
 	states = []
 	
 	for c in get_children():
-		if c is State:
+		if c is EnemyState:
 			states.append(c)
 			
+	
+	for state in states:
+		state.enemy = enemy
+		state.state_machine = self
+		state.init()
+		
 	if states.size() > 0:
-		states[0].player = player
 		change_state(states[0])
 		
 	process_mode = Node.ProcessMode.PROCESS_MODE_INHERIT
 
-func change_state(new_state:State) -> void:
+func change_state(new_state:EnemyState) -> void:
 	if new_state == null || new_state == current_state:
 		return
 		
